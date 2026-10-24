@@ -1,0 +1,74 @@
+services:
+  import:
+    image: shiti-learning-node
+    build:
+      context: .
+      dockerfile: backend-node/Dockerfile
+    command: ["node", "dist/cli.js", "import"]
+    environment:
+      DATABASE_URL: postgresql://shiti:shiti_local@db:5432/shiti
+    volumes:
+      - ./data:/app/data:ro
+    depends_on:
+      db:
+        condition: service_healthy
+  node:
+    image: shiti-learning-node
+    build:
+      context: .
+      dockerfile: backend-node/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://shiti:shiti_local@db:5432/shiti
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - ./data:/app/data:ro
+      - "./轻量化模型管理平台开发⭐⭐⭐⭐:/app/轻量化模型管理平台开发⭐⭐⭐⭐:ro"
+    depends_on:
+      import:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+  python:
+    image: shiti-learning-python
+    build:
+      context: .
+      dockerfile: backend-python/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://shiti:shiti_local@db:5432/shiti
+    ports:
+      - "127.0.0.1:3002:3002"
+    volumes:
+      - ./data:/app/data:ro
+      - "./轻量化模型管理平台开发⭐⭐⭐⭐:/app/轻量化模型管理平台开发⭐⭐⭐⭐:ro"
+    depends_on:
+      import:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:3002/api/health',timeout=3)"]
+      interval: 5s
+      timeout: 4s
+      retries: 20
+  web:
+    image: shiti-learning-web
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8088}:80"
+    depends_on:
+      node:
+        condition: service_healthy
+      python:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 4s
+      retries: 20

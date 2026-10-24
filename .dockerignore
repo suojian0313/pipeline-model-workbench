@@ -1,0 +1,16 @@
+**/node_modules
+**/.venv
+**/dist
+**/__pycache__
+**/.pytest_cache
+**/test-results
+**/playwright-report
+frontend/public/cesium
+data
+.run
+.git
+.env
+.env.*
+轻量化模型管理平台开发⭐⭐⭐⭐
+学习资料
+docs

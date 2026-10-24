@@ -1,0 +1,19 @@
+[project]
+name = "shiti-python-backend"
+version = "0.1.0"
+description = "共享 PostgreSQL 的 FastAPI 教学后端"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115,<0.136",
+  "uvicorn>=0.34,<1",
+  "psycopg[binary]>=3.2,<4",
+  "python-dotenv>=1.0,<2",
+  "openpyxl>=3.1,<4",
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "httpx>=0.28,<1", "starlette>=0.46,<1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

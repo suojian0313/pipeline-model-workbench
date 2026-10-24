@@ -1,0 +1,32 @@
+# 独立云数据库版本：不合并 compose.yaml，不创建本地数据库。
+name: shiti-cloud
+x-api: &api
+  restart: unless-stopped
+  environment:
+    DATABASE_URL: ${CLOUD_DATABASE_URL:?Configure CLOUD_DATABASE_URL in .env}
+  volumes:
+    - ./data:/app/data:ro
+    - "./轻量化模型管理平台开发⭐⭐⭐⭐:/app/轻量化模型管理平台开发⭐⭐⭐⭐:ro"
+services:
+  import:
+    <<: *api
+    image: shiti-learning-node
+    build: { context: ., dockerfile: backend-node/Dockerfile }
+    restart: "no"
+    command: ["node", "dist/cli.js", "import"]
+  node:
+    <<: *api
+    image: shiti-learning-node
+    build: { context: ., dockerfile: backend-node/Dockerfile }
+    depends_on: { import: { condition: service_completed_successfully } }
+  python:
+    <<: *api
+    image: shiti-learning-python
+    build: { context: ., dockerfile: backend-python/Dockerfile }
+    depends_on: { import: { condition: service_completed_successfully } }
+  web:
+    restart: unless-stopped
+    image: shiti-learning-web
+    build: { context: ., dockerfile: frontend/Dockerfile }
+    ports: ["${WEB_PORT:-8088}:80"]
+    depends_on: [node, python]

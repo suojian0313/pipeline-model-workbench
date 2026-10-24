@@ -1,0 +1,21 @@
+name: shiti-learning
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: shiti
+      POSTGRES_PASSWORD: shiti_local
+      POSTGRES_DB: shiti
+    ports:
+      - "127.0.0.1:55439:5432"
+    volumes:
+      - shiti-data:/var/lib/postgresql/data
+      - ./shared/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shiti -d shiti"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+volumes:
+  shiti-data:
